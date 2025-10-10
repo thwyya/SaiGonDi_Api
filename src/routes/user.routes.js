@@ -16,7 +16,6 @@ Router.post('/login', loginRateLimiter, userValidation.login, userController.log
 Router.post('/logout', verifyToken, userController.logout)
 Router.post('/request-token', userValidation.requestToken, userController.requestToken)
 Router.post('/verify-email', userValidation.verifyOTP, userController.verifyEmail)
-
 // --- Password Management ---
 Router.post('/forgot-password', verifyOtpRateLimiter, generalValidation.emailValidation, userController.sendPasswordResetOTP)
 Router.post('/reset-password', userValidation.resetPassword, userController.resetPassword)

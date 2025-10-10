@@ -46,19 +46,50 @@ const getApprovedPlaces = async (queryParams) => {
     const sortOrder = -1
 
     let matchConditions = { status: 'approved' }
-    if (queryParams.category && queryParams.category !== 'all') {
-      matchConditions.categories = queryParams.category
+    if (queryParams.categories && queryParams.categories !== 'all') {
+      matchConditions.categories = queryParams.categories
     }
     
-    
-    if (queryParams.services && queryParams.services.length > 0) {
-      matchConditions.services = { $in: queryParams.services }
+    if (queryParams.minRating) {
+      matchConditions.avgRating = { $gte: parseFloat(queryParams.minRating) }
+    }
+
+    if (queryParams.services) {
+      try {
+        let serviceIds = []
+        
+        if (Array.isArray(queryParams.services)) {
+          serviceIds = queryParams.services
+            .filter(id => id && typeof id === 'string')
+            .map(id => new mongoose.Types.ObjectId(id))
+        } else if (typeof queryParams.services === 'string') {
+          if (queryParams.services.includes(',')) {
+            serviceIds = queryParams.services.split(',')
+              .map(id => id.trim())
+              .filter(id => id)
+              .map(id => new mongoose.Types.ObjectId(id))
+          } else {
+            serviceIds = [new mongoose.Types.ObjectId(queryParams.services)]
+          }
+        }        
+        if (serviceIds.length > 0) {
+          matchConditions.services = { $all: serviceIds }
+        }
+      } catch (error) {
+        console.error('Error processing service IDs:', queryParams.services, error)
+      }
+    } else {
+      console.log('No services parameter found')
     }
 
     const places = await PlaceModel.find(matchConditions)
       .populate({
         path: 'categories',
         select: 'name icon _id'  
+      })
+      .populate({
+        path: 'services',
+        select: 'name description _id'
       })
       .populate({
         path: 'ward',

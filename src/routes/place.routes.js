@@ -3,12 +3,14 @@ import { verifyToken } from '~/middlewares/auth.middleware.js'
 import { placeValidation } from '~/validations/place.validation.js'
 import { placeController } from '~/controllers/place.controller.js'
 import { generalValidation } from '~/validations/general.validation'
+import { uploadFiles } from '~/middlewares/multer.middleware.js'
+import { uploadPlaceImages } from '~/middlewares/cloudinary.middleware.js'
 
 const Router = express.Router()
 
 Router.get('/search', placeValidation.searchValidate, placeController.searchPlaces)
 Router.get('/nearby', verifyToken, placeValidation.nearbyPlaces, placeController.getNearbyPlaces)
-Router.post('/suggest', verifyToken, placeValidation.createNew, placeController.createNew)
+Router.post('/suggest', verifyToken, uploadFiles.array('images', 10), uploadPlaceImages, placeValidation.createNew, placeController.createNew)
 Router.get('/', placeValidation.pagingValidate, placeController.getApprovedPlaces)
 Router.get('/map-data', placeValidation.pagingValidate, placeController.getPlacesMapdata)
 Router.get('/hot', placeController.getHotPlaces)
