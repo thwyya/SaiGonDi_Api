@@ -22,6 +22,7 @@ Router.post('/', blogRateLimiter, verifyToken, blogUploads, uploadBlogFiles, blo
 
 Router.get('/slug/:slug', blogController.getBlogBySlug)
 Router.get('/:id', blogController.getBlogById)
+Router.get('/pending/:id', blogController.getBlogByIdPending)
 Router.patch('/:id/privacy', verifyToken, blogValidation.updateBlogPrivacy, blogController.updateBlogPrivacy)
 Router.delete('/:id', verifyToken, blogController.deleteBlog)
 Router.put('/:id', verifyToken, blogUploads, uploadBlogFiles, blogValidation.updateBlog, blogController.updateBlog)

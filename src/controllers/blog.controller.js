@@ -59,6 +59,18 @@ const getBlogById = async (req, res, next) => {
     next(error)
   }
 }
+// thấy blog theo pending
+const getBlogByIdPending = async (req, res, next) => {
+  try {
+    const blog = await blogService.getBlogByIdPending(req.params.id, req.user)
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: blog
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 // lấy chi tiết một bài viết bằng slug
 const getBlogBySlug = async (req, res, next) => {
   try {
@@ -338,5 +350,6 @@ export const blogController = {
   getBlogsByPlaceIdentifier,
   getBlogsByWard,
   reportBlog,
-  searchBlogs
+  searchBlogs,
+  getBlogByIdPending
 }

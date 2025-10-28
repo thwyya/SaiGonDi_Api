@@ -246,6 +246,35 @@ const getBlogById = async (id, user) => {
   Blog.updateOne({ _id: id }, { $inc: { viewCount: 1 } }).exec()
   return transformCategoriesToString(blog);
 }
+//
+// Lấy chi tiết blog pending
+const getBlogByIdPending = async (id, user) => {
+  const blog = await Blog.findById(id)
+    .populate('authorId', '_id firstName lastName avatar')
+    .populate('categories', '_id name')
+    .lean()
+
+  if (!blog) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy bài viết')
+  }
+
+  // if (blog.destroy && user?.role !== 'admin') {
+  //   throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy bài viết')
+  // }
+
+  if (blog.privacy === 'private' &&
+    blog.authorId._id.toString() !== user?.id &&
+    user?.role !== 'admin') {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Bạn không có quyền xem bài viết này')
+  }
+
+  // if (blog.status === 'approved' && user?.role !== 'admin') {
+  //   throw new ApiError(StatusCodes.FORBIDDEN, 'Bài viết này chưa được duyệt')
+  // }
+
+  Blog.updateOne({ _id: id }, { $inc: { viewCount: 1 } }).exec()
+  return transformCategoriesToString(blog);
+}
 
 // Lấy chi tiết blog theo slug
 const getBlogBySlug = async (slug, user) => {
@@ -684,5 +713,6 @@ export const blogService = {
   getBlogsByWard,
   reportBlog,
   getHotBlogs,
-  searchBlogs
+  searchBlogs,
+  getBlogByIdPending
 }
